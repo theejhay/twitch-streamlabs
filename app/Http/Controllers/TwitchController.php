@@ -19,7 +19,7 @@ class TwitchController extends Controller
 
         //Fetch Twitch token, refresh token from a DB instead of Auth::user()
 
-        $user = User::where('email', 'bakhtiyor.bahriddinov@gmail.com')->first();
+        $user = User::where('email', 'ogunyemitaiwojohn@gmail.com')->first();
         $this->twitchRepository->init([
             'twitch_url' => env('TWITCH_URL'),
             'twitch_token_refresh_url' => env('TWITCH_TOKEN_REFRESH_URL'),

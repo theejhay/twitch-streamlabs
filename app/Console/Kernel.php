@@ -2,6 +2,8 @@
 
 namespace App\Console;
 
+use App\Models\User;
+use App\Repository\Helper\TwitchRepository;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -15,8 +17,26 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
-    }
+        {
+            $schedule->call(function () {
+                $TwitchRepository = resolve(TwitchRepository::class);
+
+                $user = User::where('email', 'bakhtiyor.bahriddinov@gmail.com')->first();
+                $TwitchRepository->init([
+                    'twitch_url' => env('TWITCH_URL'),
+                    'twitch_token_refresh_url' => env('TWITCH_TOKEN_REFRESH_URL'),
+                    'token'=>$user->twitch_token,
+                    'refresh_token'=>$user->twitch_refresh_token,
+                    'client_id'=>env('TWITCH_CLIENT_ID'),
+                    'client_secret'=>env('TWITCH_CLIENT_SECRET'),
+                    'twitch_id'=>$user->twitch_id
+                ]);
+                $TwitchRepository->fetchTopStreams();
+            })
+                ->name('fetch-top-streams')
+                ->withoutOverlapping(5)
+                ->everyFifteenMinutes();
+        }    }
 
     /**
      * Register the commands for the application.

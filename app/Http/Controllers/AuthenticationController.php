@@ -15,7 +15,8 @@ class AuthenticationController extends Controller
         $this->userRepository = $userRepository;
     }
 
-    public function login(){
+    public function login()
+    {
         return view('login');
     }
 
@@ -32,11 +33,12 @@ class AuthenticationController extends Controller
             ->redirect();
     }
 
-    function twitchCallback()
+    public function twitchCallback()
     {
         $twitchUser = Socialite::driver('twitch')->user();
-        if (is_null($twitchUser))
+        if (is_null($twitchUser)) {
             return redirect(404);
+        }
 
         $twitchUserId = $twitchUser->getId();
         $twitchUserEmail = $twitchUser->getEmail();
@@ -48,12 +50,19 @@ class AuthenticationController extends Controller
         $user = $this->userRepository->findByTwitch($twitchUser->getId());
         if ($user) {
             $this->userRepository->refreshToken($twitchUserId, $twitchUserToken, $twitchRefreshToken);
-        }else{
-            $user = $this->userRepository->store($twitchUserName, $twitchUserEmail, $twitchUserId, $twitchUserLogin, $twitchUserToken, $twitchRefreshToken);
+        } else {
+            $user = $this->userRepository
+                ->store(
+                    $twitchUserName,
+                    $twitchUserEmail,
+                    $twitchUserId,
+                    $twitchUserLogin,
+                    $twitchUserToken,
+                    $twitchRefreshToken
+                );
         }
         Auth::login($user);
 
         return redirect(route('fetch-user-streams'));
     }
-
 }

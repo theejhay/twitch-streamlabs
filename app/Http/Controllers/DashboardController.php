@@ -62,6 +62,4 @@ class DashboardController extends Controller
         $data = $this->dashboardRepository->getSharedTags();
         return view('dashboard.shared-tags', ['data'=>$data]);
     }
-
-
 }

@@ -56,5 +56,4 @@ class TwitchController extends Controller
 
         return redirect(route('twitch-dashboard'));
     }
-
 }

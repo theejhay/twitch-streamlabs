@@ -1,0 +1,58 @@
+version: "3.7"
+services:
+  app:
+    build:
+      args:
+        user: ${user}
+        uid: ${uid}
+      context: ./
+      dockerfile: .docker/Dockerfile
+    image: streamlabs-service
+    container_name: streamlabs-app
+    restart: unless-stopped
+    working_dir: /var/www/
+    depends_on:
+      - db
+    volumes:
+      - ./:/var/www
+      - ./.docker/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+      - ./.docker/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+    environment:
+      PHP_IDE_CONFIG: serverName=docker
+    networks:
+      - streamlabs-service
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: streamlabs
+    volumes:
+        - pgdata:/var/lib/postgresql/data
+    container_name: streamlabs-service-db
+    restart: unless-stopped
+    ports:
+      - 5434:5432
+    networks:
+      - streamlabs-service
+
+  nginx:
+    image: nginx:alpine
+    container_name: streamlabs-service-nginx
+    restart: unless-stopped
+    ports:
+      - 83:80
+    volumes:
+      - ./:/var/www
+      - ./.docker/nginx:/etc/nginx/conf.d/
+    networks:
+      streamlabs-service:
+        aliases:
+          - app.streamlabs.local
+volumes:
+  pgdata:
+
+networks:
+  streamlabs-service:
+    driver: bridge
